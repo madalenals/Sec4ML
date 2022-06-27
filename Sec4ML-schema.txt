@@ -1,0 +1,457 @@
+/************************************************
+*
+*    Schema Sec4ML-O Prov
+*
+*    Versao: 1.0
+*
+************************************************/
+
+
+--DROP TABLE LOGICALATTRIBUTECATEGORY;
+CREATE TABLE LOGICALATTRIBUTECATEGORY
+( 
+  logicalattributecategory_id    UUID primary key,
+  logicalattributecharacteristic varchar(500) not null,
+  logicalattributecategory_label varchar(500) not null
+);
+
+CREATE INDEX logicalattributecategory_id_idx ON 
+logicalattributecategory (logicalattributecategory_id);
+
+
+--DROP TABLE LOGICALATTRIBUTE;
+CREATE TABLE LOGICALATTRIBUTE
+(
+ logicalattribute_id        UUID primary key,
+ logicalattributecategory_id UUID,
+ logicalattribute_label     varchar(500) not null,
+ columntable_id             UUID   not null,
+ justification_id           UUID
+);
+
+CREATE INDEX logicalattribute_id_idx ON logicalattribute 
+(logicalattribute_id);
+
+
+--DROP TABLE COLUMNTABLE;
+CREATE TABLE COLUMNTABLE
+(
+columntable_id     UUID primary key,
+dataset_id    	    UUID not null,
+column_label  	    varchar(500) not null,
+structuredtype_id   UUID   not null,
+column_lenght 		float
+);
+
+CREATE INDEX COLUMNTABLE_id_idx ON COLUMNTABLE (COLUMNTABLE_id);
+
+
+--DROP TABLE ROWTABLE;
+CREATE TABLE ROWTABLE
+( 
+ rowtable_id	                    varchar(1000) primary key,
+ dataset_id	                    varchar(1000)
+ );
+ 
+CREATE INDEX rowtable_id_idx ON ROWTABLE (rowtable_id);
+ 
+ 
+--DROP TABLE ROWCOLUMNVALUE;
+CREATE TABLE ROWCOLUMNVALUE
+(
+ columntable_id		varchar(100) ,
+ rowtable_id		varchar(100) ,
+ rowcolumn_value     varchar(1000) ,
+ rowcolumn_modifiedvalue varchar(1000)
+ PRIMARY KEY (columntable_id, rowtable_id)
+ );
+
+CREATE INDEX ROWCOLUMNVALUE_id_idx ON ROWCOLUMNVALUE 
+(columntable_id, rowtable_id);
+
+
+--DROP TABLE SQLSTRUCTUREDTYPE;
+CREATE TABLE SQLSTRUCTUREDTYPE
+(
+ structuredtype_id                  UUID primary key,
+ structuredtype_label               varchar(500),
+ qualitativedatatype_id             UUID,
+ quantitativedatatype_id            UUID
+ );
+
+CREATE INDEX SQLSTRUCTUREDTYPE_id_idx ON SQLSTRUCTUREDTYPE 
+(structuredtype_id);
+
+--DROP TABLE LABELEDDATASET;
+CREATE TABLE LABELEDDATASET
+(
+dataset_id                          UUID primary key,
+version                             integer not null,
+label                               varchar(500),
+initial_validity                    timestamp,
+final_validity                      timestamp
+);
+
+CREATE INDEX LABELEDDATASET_id_idx ON LABELEDDATASET 
+(dataset_id);
+
+
+--DROP TABLE QUALITATIVEDATATYPE;
+CREATE TABLE QUALITATIVEDATATYPE
+( 
+  qualitativedatatype_id 	        UUID primary key,
+  nominal_flag				        boolean,
+  ordinal_flag				        boolean
+);
+
+CREATE INDEX QUALITATIVEDATATYPE_id_idx ON QUALITATIVEDATATYPE 
+(qualitativedatatype_id);
+
+--DROP TABLE QUANTITATIVEDATATYPE;
+CREATE TABLE QUANTITATIVEDATATYPE
+( 
+  quantitativedatatype_id 	        UUID primary key,
+  discreet_flag 			        boolean,
+  continuos_flag			        boolean
+);
+
+CREATE INDEX QUANTITATIVEDATATYPE_id_idx ON QUANTITATIVEDATATYPE
+(quantitativedatatype_id);
+
+
+--DROP TABLE DATAPREPROCESSINGOPERATOR;
+CREATE TABLE DATAPREPROCESSINGOPERATOR
+( 
+  datapreprocessingoperator_id 		UUID primary key,
+  datapreprocessingoperator_label   varchar(1000),
+  datapreprocessingoperator_dsc		varchar(1000),
+  operatorcategory_id				UUID
+);
+
+CREATE INDEX DATAPREPROCESSINGOPERATOR_id_idx ON DATAPREPROCESSINGOPERATOR (DATAPREPROCESSINGOPERATOR_id);
+
+
+--DROP TABLE OPERATORCATEGORY;
+CREATE TABLE OPERATORCATEGORY
+( 
+  operatorcategory_id			    UUID primary key,
+  logicalattributecategory_id 	    UUID,
+  operatorcategory_dsc			    varchar(500)
+ );
+
+CREATE INDEX OPERATORCATEGORY_id_idx ON OPERATORCATEGORY 
+(OPERATORCATEGORY_id);
+
+
+--DROP TABLE DATAANONYMIZATIONOPERATOR;
+CREATE TABLE DATAANONYMIZATIONOPERATOR
+( 
+  dataanonymizationoperator_id 		UUID primary key,
+  dataanonymizationoperator_dsc		varchar(1000),
+  dataanonymizationoperator_label   varchar(1000),
+  operatorcategory_id				UUID
+ );
+ 
+ CREATE INDEX DATAANONYMIZATIONOPERATOR_id_idx ON DATAANONYMIZATIONOPERATOR (DATAANONYMIZATIONOPERATOR_id);
+ 
+--DROP TABLE PARAMETER;
+CREATE TABLE PARAMETER
+(
+ parameter_id			UUID primary key,
+ parameter_dsc			varchar(1000)
+);
+
+CREATE INDEX PARAMETER_id_idx ON PARAMETER (PARAMETER_id);
+ 
+ 
+--DROP TABLE SOFTWARE;
+CREATE TABLE SOFTWARE
+(
+ software_id				UUID primary key,
+ software_dsc			    varchar(1000),
+ software_modificationdate 	timestamp,
+ software_version 			integer,
+ operatorcategory_id		UUID,
+ algorithm_id				UUID
+);
+
+CREATE INDEX SOFTWARE_id_idx ON SOFTWARE (SOFTWARE_id);
+
+--DROP TABLE ALGORITHM;
+CREATE TABLE ALGORITHM
+( 
+  algorithm_id			            UUID,
+  algorithm_label 		            varchar(500),
+  algorithm_version		            integer,
+  parameter_id 			            UUID,
+  operatorcategory_id	            UUID,
+  primary key (algorithm_id, operatorcategory_id)
+);
+
+CREATE INDEX ALGORITHM_id_idx ON ALGORITHM (ALGORITHM_id);
+
+--DROP TABLE PARAMETERVALUE;
+CREATE TABLE PARAMETERVALUE
+( 
+  parameter_id 			            UUID,
+  stepexecution_id   	            varchar(1000),
+  parametervalue		            varchar(1000)
+ ); 
+ 
+CREATE INDEX PARAMETERVALUE_id_idx ON PARAMETERVALUE 
+(PARAMETER_id);  
+
+--**** ETL4LP ****
+
+--DROP TABLE STEPCOMPOSITION;
+CREATE TABLE STEPCOMPOSITION
+(
+ stepcomposition_id                 UUID primary key,
+ stepcomposition_label              varchar(500),
+ stepcomposition_previousstep       UUID,
+ stepcomposition_nextstep           UUID,
+ stepcomposition_modificationdate   timestamp,
+ stepcomposition_version            integer,
+ operatorcategory_id                UUID
+ );
+ 
+CREATE INDEX STEPCOMPOSITION_id_idx ON STEPCOMPOSITION 
+(STEPCOMPOSITION_id);  
+
+ 
+--DROP TABLE STEPEXECUTION;
+CREATE TABLE STEPEXECUTION
+(
+ stepexecution_id   		        UUID primary key,
+ stepexecution_label 		        varchar(500),
+ stepexecution_starttime 	        date,
+ stepexecution_endtime  	        date,
+ stepexecution_errormessage         text,
+ stepexecution_status 		        varchar(100),
+ workflowexecution_id 		        varchar(1000),
+ stepcomposition_id  		        varchar(1000),
+ software_id				        UUID
+);
+
+CREATE INDEX STEPEXECUTION_id_idx ON STEPEXECUTION 
+(STEPEXECUTION_id);  
+
+--DROP TABLE WORKFLOWCOMPOSITION;
+CREATE TABLE WORKFLOWCOMPOSITION
+(
+ workflowcomposition_id                 UUID primary key,
+ workflowcomposition_label              varchar(500),
+ workflowcomposition_modificationdate   timestamp,
+ workflowcomposition_version            integer,
+ workflowcomposition_contributor        varchar(100)
+ );
+ 
+CREATE INDEX WORKFLOWCOMPOSITION_id_idx ON 
+WORKFLOWCOMPOSITION (WORKFLOWCOMPOSITION_id);  
+
+
+--DROP TABLE WORKFLOWEXECUTION;
+DROP TABLE WORKFLOWEXECUTION;
+CREATE TABLE WORKFLOWEXECUTION
+(
+ workflowexecution_id		 varchar(500) primary key,
+ workflowcomposition_id      varchar(500),
+ workflowexecution_label 	 varchar(500),
+ worflowexecution_unit   	 varchar(500),
+ workflowexecution_starttime timestamp without time zone,
+ workflowexecution_endtime 	 timestamp without time zone,
+ workflowexecution_status 	 varchar(100)
+ );
+
+CREATE INDEX WORKFLOWEXECUTION_id_idx ON WORKFLOWEXECUTION 
+(WORKFLOWEXECUTION_id);  
+
+
+--DROP TABLE PERSON;
+CREATE TABLE PERSON
+(
+person_id  			  varchar(500) primary key,
+familyName  		  varchar(500) not null,
+firstName   		  varchar(500) not null,
+lastName    		  varchar(500) not null,
+surname     		  varchar(500) not null,
+gender_concept_id 	  integer not null,
+year_of_birth     	  integer not null,
+month_of_birth    	  integer not null,
+death_date            date,
+race_concept_id   	  integer not null,
+ethnicity_concept_id  integer not null,
+location_id           integer,
+plan                  varchar(1000),
+geekcode              varchar(1000),
+publications          varchar(1000),
+pastProject           varchar(500),
+currentProject        varchar(500)
+);
+
+CREATE INDEX PERSON_id_idx ON PERSON (PERSON_id); 
+
+--DROP TABLE ORGANIZATION;
+CREATE TABLE ORGANIZATION
+(
+organization_id 		            varchar(500) primary key,
+organizationName 		            varchar(1000),
+organizationnature_id 	            integer,
+location_id     		            varchar(500) 
+);
+
+CREATE INDEX ORGANIZATION_id_idx ON ORGANIZATION 
+(ORGANIZATION_id); 
+
+--DROP TABLE LOCATION;
+CREATE TABLE LOCATION
+(
+location_id		                    varchar(500) primary key,
+address_1                           varchar(1000),
+address_2                           varchar(1000),
+city                                varchar(500),
+state                               varchar(500),
+zip                                 varchar(500),
+country                             varchar(500)
+);
+
+CREATE INDEX LOCATION_id_idx ON LOCATION (LOCATION_id); 
+
+
+DROP TABLE DATASUBJECT; 
+CREATE TABLE DATASUBJECT
+(
+  datasubject_id		            UUID primary key,
+  person_id				            UUID,
+  organization_id		            UUID
+);
+
+CREATE INDEX DATASUBJECT_id_idx ON DATASUBJECT 
+(DATASUBJECT_id); 
+
+DROP TABLE CONSENTAGREEMENT;
+CREATE TABLE CONSENTAGREEMENT
+( 
+  consentagreement_id 	            UUID PRIMARY KEY,
+  consentagreement_text	            text,
+  datasubject_id		            UUID,
+  rowtable_id			            UUID
+ );
+
+CREATE INDEX CONSENTAGREEMENT_id_idx ON CONSENTAGREEMENT 
+(CONSENTAGREEMENT_id); 
+
+
+DROP TABLE DATATABLE; 
+CREATE TABLE DATATABLE
+( 
+  data_id			                UUID primary key,
+  datakind_id		                integer,
+  datakind_dsc		                varchar(1000)
+);
+
+CREATE INDEX DATATABLE_id_idx ON DATATABLE (DATA_id); 
+
+--DROP TABLE PERSONALDATA;
+CREATE TABLE PERSONALDATA
+( 
+  personaldata_id 		            varchar(500),
+  rowtable_id                       varchar(500),
+  datakind_id			            integer,	
+  consentagreement_id 	            varchar(500),
+  datasubject_id		            varchar(500),
+  primary key (personaldata_id, rowtable_id)
+);
+
+
+CREATE INDEX PERSONALDATA_id_idx ON PERSONALDATA 
+(personaldata_id, rowtable_id); 
+
+
+--DROP TABLE SUPERVISORAUTHORITY; 
+CREATE TABLE SUPERVISORAUTHORITY
+(
+ supervisorauthority_id             UUID primary key,
+ organization_id                    UUID,
+ effective_date                     date
+ );
+
+CREATE INDEX SUPERVISORAUTHORITY_id_idx ON SUPERVISORAUTHORITY 
+(SUPERVISORAUTHORITY_id); 
+
+CREATE DOMAIN JUSTIFICATIONTYPE AS VARCHAR(100)
+NOT NULL
+CHECK (VALUE IN ('Legal Obligation','Vital Interest','Public Interest','Official Authority','Legitimate Interest','Contract'));
+
+--DROP TABLE JUSTIFICATION; 
+CREATE TABLE JUSTIFICATION
+(
+ justification_id 		            UUID,
+ controller_id			            UUID,
+ supervisorauthority_id             UUID,
+ justification_start	            date,
+ justification_end		            date,
+ justification_type		            justificationtype,
+ request_id				            UUID,
+ primary key (justification_id, controller_id)
+ );
+ 
+ 
+CREATE INDEX JUSTIFICATION_id_idx ON JUSTIFICATION 
+(justification_id, controller_id); 
+ 
+CREATE DOMAIN REQUESTTYPE AS VARCHAR(100)
+NOT NULL
+CHECK ( VALUE IN ('Consent','Withdraw','Access','Correction','Erasure','Restriction'));
+
+
+--DROP TABLE REQUEST;
+CREATE TABLE REQUEST
+(
+ request_id			                UUID,
+ datasubject_id 	                UUID, 
+ request_date		                date,
+ request_type		                requesttype,
+ controller_id		                UUID,
+ personaldata_id	                UUID,
+ primary key (request_id, datasubject_id)
+ );
+ 
+ CREATE INDEX REQUEST_id_idx ON REQUEST (REQUEST_id); 
+
+--DROP TABLE CONTROLLER; 
+CREATE TABLE CONTROLLER
+(
+ controller_id		                UUID,
+ process_id			                UUID,
+ organization_id	                UUID,
+ primary key (controller_id,process_id)
+ );
+ 
+  CREATE INDEX CONTROLLER_id_idx ON CONTROLLER (CONTROLLER_id); 
+--DROP TABLE PROCESSOR; 
+CREATE TABLE PROCESSOR
+(
+ processor_id			            UUID,
+ process_id				            UUID,
+ organization_id		            UUID,
+ primary key (processor_id, process_id)
+ );
+ 
+CREATE INDEX PROCESSOR_id_idx ON PROCESSOR (PROCESSOR_id); 
+   
+  
+--DROP TABLE PROCESS; 
+CREATE TABLE PROCESS
+(
+ process_id				            UUID primary key,
+ process_kind			            varchar(100),
+ stepcomposition_id 	            UUID,
+ processor_id			            UUID,
+ controller_id			            UUID,
+ justification_id		            UUID
+);
+
+ CREATE INDEX PROCESS_id_idx ON PROCESS (PROCESS_id); 
+
+    
