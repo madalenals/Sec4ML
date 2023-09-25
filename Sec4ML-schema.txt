@@ -22,35 +22,50 @@ logicalattributecategory (logicalattributecategory_id);
 --DROP TABLE LOGICALATTRIBUTE;
 CREATE TABLE LOGICALATTRIBUTE
 (
- logicalattribute_id        UUID primary key,
- logicalattributecategory_id UUID,
- logicalattribute_label     varchar(500) not null,
- columntable_id             UUID   not null,
- justification_id           UUID
+ logicalattribute_id        	UUID primary key,
+ logicalattributecategory_id 	UUID,
+ logicalattribute_label     	varchar(500) not null,
+ columntable_id             	UUID   not null,
+ justification_id           	UUID
 );
 
 CREATE INDEX logicalattribute_id_idx ON logicalattribute 
 (logicalattribute_id);
 
+ALTER TABLE LOGICALATTRIBUTE
+ADD CONSTRAINT logicalattributecategory_fk FOREIGN KEY (logicalattributecategory_id) 
+REFERENCES LOGICALATTRIBUTECATEGORY (logicalattributecategory_id);
+
+ALTER TABLE LOGICALATTRIBUTE  
+ADD CONSTRAINT columntable_id_fk FOREIGN KEY (columntable_id) 
+REFERENCES COLUMNTABLE (columntable_id);
+
 
 --DROP TABLE COLUMNTABLE;
 CREATE TABLE COLUMNTABLE
 (
-columntable_id     UUID primary key,
-dataset_id    	    UUID not null,
-column_label  	    varchar(500) not null,
-structuredtype_id   UUID   not null,
-column_lenght 		float
+columntable_id     		UUID primary key,
+dataset_id    	    		UUID not null,
+column_label  	    		varchar(500) not null,
+structuredtype_id   		UUID   not null,
+column_lenght 			float
 );
 
 CREATE INDEX COLUMNTABLE_id_idx ON COLUMNTABLE (COLUMNTABLE_id);
 
+ALTER TABLE COLUMNTABLE 
+ADD CONSTRAINT dataset_id_fk FOREIGN KEY (dataset_id) 
+REFERENCES LABLEDDATASET (dataset_id);
+
+ALTER TABLE COLUMNTABLE 
+ADD CONSTRAINT structuredtype_id_fk FOREIGN KEY (structuredtype_id) 
+REFERENCES SQLSTRUCTUREDTYPE (structuredtype_id);
 
 --DROP TABLE ROWTABLE;
 CREATE TABLE ROWTABLE
 ( 
- rowtable_id	                    varchar(1000) primary key,
- dataset_id	                    varchar(1000)
+ rowtable_id	                varchar(1000) primary key,
+ dataset_id	                varchar(1000)
  );
  
 CREATE INDEX rowtable_id_idx ON ROWTABLE (rowtable_id);
@@ -81,6 +96,14 @@ CREATE TABLE SQLSTRUCTUREDTYPE
 
 CREATE INDEX SQLSTRUCTUREDTYPE_id_idx ON SQLSTRUCTUREDTYPE 
 (structuredtype_id);
+
+ALTER TABLE SQLSTRUCTUREDTYPE 
+ADD CONSTRAINT qualitativedatatype_id_fk FOREIGN KEY (qualitativedatatype_id) 
+REFERENCES QUALITATIVEDATATYPE (qualitativedatatype_id);
+
+ALTER TABLE SQLSTRUCTUREDTYPE 
+ADD CONSTRAINT quantitativedatatype_id_fk FOREIGN KEY (quantitativedatatype_id) 
+REFERENCES QUANTITATIVEDATATYPE (quantitativedatatype_id);
 
 --DROP TABLE LABELEDDATASET;
 CREATE TABLE LABELEDDATASET
@@ -130,6 +153,9 @@ CREATE TABLE DATAPREPROCESSINGOPERATOR
 
 CREATE INDEX DATAPREPROCESSINGOPERATOR_id_idx ON DATAPREPROCESSINGOPERATOR (DATAPREPROCESSINGOPERATOR_id);
 
+ALTER TABLE DATAPREPROCESSINGOPERATOR 
+ADD CONSTRAINT operatorcategory_id_fk FOREIGN KEY (operatorcategory_id) 
+REFERENCES OPERATORCATEGORY (operatorcategory_id);
 
 --DROP TABLE OPERATORCATEGORY;
 CREATE TABLE OPERATORCATEGORY
@@ -141,6 +167,10 @@ CREATE TABLE OPERATORCATEGORY
 
 CREATE INDEX OPERATORCATEGORY_id_idx ON OPERATORCATEGORY 
 (OPERATORCATEGORY_id);
+
+ALTER TABLE OPERATORCATEGORY 
+ADD CONSTRAINT logicalattributecategory_id_fk FOREIGN KEY (logicalattributecategory_id) 
+REFERENCES LOGICALATTRIBUTECATEGORY (logicalattributecategory_id);
 
 
 --DROP TABLE DATAANONYMIZATIONOPERATOR;
@@ -154,6 +184,10 @@ CREATE TABLE DATAANONYMIZATIONOPERATOR
  
  CREATE INDEX DATAANONYMIZATIONOPERATOR_id_idx ON DATAANONYMIZATIONOPERATOR (DATAANONYMIZATIONOPERATOR_id);
  
+ALTER TABLE DATAANONYMIZATIONOPERATOR 
+ADD CONSTRAINT operatorcategory_id_fk FOREIGN KEY (operatorcategory_id) 
+REFERENCES OPERATORCATEGORY (operatorcategory_id);
+
 --DROP TABLE PARAMETER;
 CREATE TABLE PARAMETER
 (
@@ -177,6 +211,10 @@ CREATE TABLE SOFTWARE
 
 CREATE INDEX SOFTWARE_id_idx ON SOFTWARE (SOFTWARE_id);
 
+ALTER TABLE SOFTWARE 
+ADD CONSTRAINT operatorcategory_id_fk FOREIGN KEY (operatorcategory_id) 
+REFERENCES OPERATORCATEGORY (operatorcategory_id);
+
 --DROP TABLE ALGORITHM;
 CREATE TABLE ALGORITHM
 ( 
@@ -190,6 +228,14 @@ CREATE TABLE ALGORITHM
 
 CREATE INDEX ALGORITHM_id_idx ON ALGORITHM (ALGORITHM_id);
 
+ALTER TABLE ALGORITHM 
+ADD CONSTRAINT parameter_id_fk FOREIGN KEY (parameter_id) 
+REFERENCES PARAMETER (parameter_id);
+
+ALTER TABLE ALGORITHM 
+ADD CONSTRAINT operatorcategory_id_fk FOREIGN KEY (operatorcategory_id) 
+REFERENCES OPERATORCATEGORY (operatorcategory_id);
+
 --DROP TABLE PARAMETERVALUE;
 CREATE TABLE PARAMETERVALUE
 ( 
@@ -200,6 +246,10 @@ CREATE TABLE PARAMETERVALUE
  
 CREATE INDEX PARAMETERVALUE_id_idx ON PARAMETERVALUE 
 (PARAMETER_id);  
+
+ALTER TABLE PARAMETERVALUE 
+ADD CONSTRAINT stepexecution_id_fk FOREIGN KEY (stepexecution_id) 
+REFERENCES STEPCOMPOSITION (stepexecution_id);
 
 --**** ETL4LP ****
 
@@ -235,6 +285,11 @@ CREATE TABLE STEPEXECUTION
 
 CREATE INDEX STEPEXECUTION_id_idx ON STEPEXECUTION 
 (STEPEXECUTION_id);  
+
+
+ALTER TABLE STEPEXECUTION 
+ADD CONSTRAINT software_id_fk FOREIGN KEY (software_id) 
+REFERENCES SOFTWARE (software_id);
 
 --DROP TABLE WORKFLOWCOMPOSITION;
 CREATE TABLE WORKFLOWCOMPOSITION
@@ -303,6 +358,10 @@ location_id     		            varchar(500)
 CREATE INDEX ORGANIZATION_id_idx ON ORGANIZATION 
 (ORGANIZATION_id); 
 
+ALTER TABLE ORGANIZATION -- NÃO CRIADA POIS TIPOS DE DADOS SÃO DIFERENTES
+ADD CONSTRAINT location_id_fk FOREIGN KEY (location_id) 
+REFERENCES LOCATION (location_id);
+
 --DROP TABLE LOCATION;
 CREATE TABLE LOCATION
 (
@@ -340,6 +399,10 @@ CREATE TABLE CONSENTAGREEMENT
 
 CREATE INDEX CONSENTAGREEMENT_id_idx ON CONSENTAGREEMENT 
 (CONSENTAGREEMENT_id); 
+
+ALTER TABLE CONSENTAGREEMENT 
+ADD CONSTRAINT datasubject_id_fk FOREIGN KEY (datasubject_id) 
+REFERENCES DATASUBJECT (datasubject_id);
 
 
 DROP TABLE DATATABLE; 
@@ -399,6 +462,10 @@ CREATE TABLE JUSTIFICATION
  
 CREATE INDEX JUSTIFICATION_id_idx ON JUSTIFICATION 
 (justification_id, controller_id); 
+
+ALTER TABLE JUSTIFICATION 
+ADD CONSTRAINT supervisorauthority_id_fk FOREIGN KEY (supervisorauthority_id) 
+REFERENCES SUPERVISORAUTHORITY (supervisorauthority_id);
  
 CREATE DOMAIN REQUESTTYPE AS VARCHAR(100)
 NOT NULL
@@ -419,6 +486,11 @@ CREATE TABLE REQUEST
  
  CREATE INDEX REQUEST_id_idx ON REQUEST (REQUEST_id); 
 
+ ALTER TABLE REQUEST 
+ ADD CONSTRAINT datasubject_id_fk FOREIGN KEY (datasubject_id) 
+ REFERENCES DATASUBJECT (datasubject_id);
+
+
 --DROP TABLE CONTROLLER; 
 CREATE TABLE CONTROLLER
 (
@@ -429,6 +501,12 @@ CREATE TABLE CONTROLLER
  );
  
   CREATE INDEX CONTROLLER_id_idx ON CONTROLLER (CONTROLLER_id); 
+
+ ALTER TABLE CONTROLLER 
+ ADD CONSTRAINT process_id_fk FOREIGN KEY (process_id) 
+ REFERENCES PROCESS (process_id);
+
+
 --DROP TABLE PROCESSOR; 
 CREATE TABLE PROCESSOR
 (
@@ -439,7 +517,10 @@ CREATE TABLE PROCESSOR
  );
  
 CREATE INDEX PROCESSOR_id_idx ON PROCESSOR (PROCESSOR_id); 
-   
+ 
+ALTER TABLE PROCESSOR 
+ADD CONSTRAINT process_id_fk FOREIGN KEY (process_id) 
+REFERENCES PROCESS (process_id);    
   
 --DROP TABLE PROCESS; 
 CREATE TABLE PROCESS
